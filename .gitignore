@@ -6,8 +6,11 @@ sample_data/
 archives/
 images/
 logs/
+
 out_images*/
 out_models*/
+
+*.pyc
 
 *.pkl
 *.gz
@@ -15,5 +18,5 @@ out_models*/
 *.png
 *.jpg
 
-.ipynb_checkpoints
+.ipynb_checkpoints/
 
