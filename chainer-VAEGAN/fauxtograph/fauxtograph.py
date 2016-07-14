@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from PIL import Image
 import chainer.functions as F
 from chainer import Variable
