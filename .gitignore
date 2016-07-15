@@ -18,6 +18,7 @@ out_models*/
 *.out
 *.png
 *.jpg
+*.h5
 
 .ipynb_checkpoints/
 

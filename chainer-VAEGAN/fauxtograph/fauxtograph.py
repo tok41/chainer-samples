@@ -13,6 +13,7 @@ import numpy as np
 import os
 from IPython.display import display
 import json
+import pandas as pd
 
 
 class VAE(object):
@@ -1315,6 +1316,8 @@ class VAEGAN(object):
         c_samples = np.random.standard_normal((width, self.latent_width)).astype(np.float32)
         save_counter = 0
 
+        df_col = ['epoch', 'enc_loss', 'dec_loss', 'dis_loss', 'GAN_loss', 'like_loss', 'prior_loss', 'L_base', 'L_rec', 'L_p']
+        self.loss_buf = pd.DataFrame(columns=df_col)
         for epoch in range(1, n_epochs + 1):
             print('epoch: %i' % epoch)
             t1 = time.time()
@@ -1326,6 +1329,10 @@ class VAEGAN(object):
             sum_l_gan = 0.
             sum_l_like = 0.
             sum_l_prior = 0.
+
+            sum_l_b_gan = 0.
+            sum_l_r_gan = 0.
+            sum_l_s_gan = 0.
             count = 0
             for i in tqdm.tqdm(batch_iter):
                 x = img_data[indexes[i: i + batch_size]]
@@ -1392,26 +1399,27 @@ class VAEGAN(object):
                             img_path=img_path,
                             epoch=epoch
                         )
-                        display(fig)
+                        #display(fig)
 
             if save_freq > 0:
                 save_counter += 1
                 assert type(save_freq) == int, "save_freq must be an integer."
                 if epoch % save_freq == 0:
                     name = "vaegan_epoch%s" % str(epoch)
+                    print 'save_model : {}'.format(name)
                     if save_counter == 1:
                         save_meta = True
                     else:
                         save_meta = False
                     self.save(model_path, name, save_meta=save_meta)
-                    fig = self._plot_img(
-                        plot_data,
-                        c_samples,
-                        img_path=img_path,
-                        epoch=epoch,
-                        batch=n_batches,
-                        save_pic=True
-                        )
+                    #fig = self._plot_img(
+                    #    plot_data,
+                    #    c_samples,
+                    #    img_path=img_path,
+                    #    epoch=epoch,
+                    #    batch=n_batches,
+                    #    save_pic=True
+                    #    )
             sum_l_enc /= n_batches
             sum_l_dec /= n_batches
             sum_l_disc /= n_batches
@@ -1424,6 +1432,10 @@ class VAEGAN(object):
             print(msg2.format(sum_l_gan, sum_l_like, sum_l_prior))
             t_diff = time.time()-t1
             print("time: %f\n\n" % t_diff)
+            df_tmp = pd.DataFrame([[epoch,
+                                    sum_l_enc, sum_l_dec, sum_l_disc, sum_l_gan, sum_l_like, sum_l_prior, 
+                                    sum_l_b_gan, sum_l_r_gan, sum_l_s_gan]], columns=df_col)
+            self.loss_buf = self.loss_buf.append(df_tmp, ignore_index=True)
 
     def _plot_img(self, img_data, samples, img_path='./', epoch=1, batch=1, save_pic=False):
 
